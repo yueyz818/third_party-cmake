@@ -83,6 +83,8 @@
 #endif
 #include "cmExtraCodeLiteGenerator.h"
 
+#include "cmGlobalGNGenerator.h"
+
 #if !defined(CMAKE_BOOT_MINGW)
 #include "cmExtraCodeBlocksGenerator.h"
 #endif
@@ -1685,6 +1687,7 @@ void cmake::AddDefaultGenerators()
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   this->Generators.push_back(cmGlobalNinjaGenerator::NewFactory());
 #endif
+  this->Generators.push_back(cmGlobalGNGenerator::NewFactory());
 #if defined(CMAKE_USE_WMAKE)
   this->Generators.push_back(cmGlobalWatcomWMakeGenerator::NewFactory());
 #endif

@@ -738,9 +738,15 @@ endif()
 
 # Ninja support
 set(SRCS ${SRCS}
+  cmGlobalGNGenerator.cxx
+  cmGlobalGNGenerator.h
   cmGlobalNinjaGenerator.cxx
   cmGlobalNinjaGenerator.h
+  cmGNTargetGenerator.cxx
+  cmGNTargetGenerator.h
   cmNinjaTypes.h
+  cmLocalGNGenerator.cxx
+  cmLocalGNGenerator.h
   cmLocalNinjaGenerator.cxx
   cmLocalNinjaGenerator.h
   cmNinjaTargetGenerator.cxx
