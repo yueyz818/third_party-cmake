@@ -46,6 +46,7 @@ private:
   cmCAString Filename;
   cmCAEnabler ExportOld;
   cmCAString AndroidMKFile;
+  cmCAString JSONFile;
 
   cmExportSet* ExportSet;
 

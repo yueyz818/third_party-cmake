@@ -8,6 +8,7 @@
 
 #include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportBuildFileGenerator.h"
+#include "cmExportBuildJSONGenerator.h"
 #include "cmExportSetMap.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -34,6 +35,7 @@ cmExportCommand::cmExportCommand()
   , Filename(&Helper, "FILE", &ArgumentGroup)
   , ExportOld(&Helper, "EXPORT_LINK_INTERFACE_LIBRARIES", &ArgumentGroup)
   , AndroidMKFile(&Helper, "ANDROID_MK")
+  , JSONFile(&Helper, "JSON")
 {
   this->ExportSet = nullptr;
 }
@@ -71,6 +73,11 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
   if (this->AndroidMKFile.WasFound()) {
     fname = this->AndroidMKFile.GetString();
     android = true;
+  }
+  bool json = false;
+  if (this->JSONFile.WasFound()) {
+    fname = this->JSONFile.GetString();
+    json = true;
   }
   if (!this->Filename.WasFound() && fname.empty()) {
     if (args[0] != "EXPORT") {
@@ -187,6 +194,8 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
   cmExportBuildFileGenerator* ebfg = nullptr;
   if (android) {
     ebfg = new cmExportBuildAndroidMKGenerator;
+  } else if (json) {
+    ebfg = new cmExportBuildJSONGenerator;
   } else {
     ebfg = new cmExportBuildFileGenerator;
   }

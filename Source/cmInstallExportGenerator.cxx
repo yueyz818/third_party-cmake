@@ -10,6 +10,9 @@
 #include "cmExportInstallAndroidMKGenerator.h"
 #endif
 #include "cmExportInstallFileGenerator.h"
+#ifdef CMAKE_BUILD_WITH_CMAKE
+#include "cmExportInstallJSONGenerator.h"
+#endif
 #include "cmExportSet.h"
 #include "cmInstallType.h"
 #include "cmLocalGenerator.h"
@@ -20,7 +23,8 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   cmExportSet* exportSet, const char* destination,
   const char* file_permissions, std::vector<std::string> const& configurations,
   const char* component, MessageLevel message, bool exclude_from_all,
-  const char* filename, const char* name_space, bool exportOld, bool android)
+  const char* filename, const char* name_space, bool exportOld, bool android,
+  bool json)
   : cmInstallGenerator(destination, configurations, component, message,
                        exclude_from_all)
   , ExportSet(exportSet)
@@ -33,6 +37,10 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   if (android) {
 #ifdef CMAKE_BUILD_WITH_CMAKE
     this->EFGen = new cmExportInstallAndroidMKGenerator(this);
+#endif
+  } else if (json) {
+#ifdef CMAKE_BUILD_WITH_CMAKE
+    this->EFGen = new cmExportInstallJSONGenerator(this);
 #endif
   } else {
     this->EFGen = new cmExportInstallFileGenerator(this);

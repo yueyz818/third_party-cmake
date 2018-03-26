@@ -181,12 +181,16 @@ set(SRCS
   cmExportBuildAndroidMKGenerator.cxx
   cmExportBuildFileGenerator.h
   cmExportBuildFileGenerator.cxx
+  cmExportBuildJSONGenerator.h
+  cmExportBuildJSONGenerator.cxx
   cmExportFileGenerator.h
   cmExportFileGenerator.cxx
   cmExportInstallAndroidMKGenerator.h
   cmExportInstallAndroidMKGenerator.cxx
   cmExportInstallFileGenerator.h
   cmExportInstallFileGenerator.cxx
+  cmExportInstallJSONGenerator.h
+  cmExportInstallJSONGenerator.cxx
   cmExportTryCompileFileGenerator.h
   cmExportTryCompileFileGenerator.cxx
   cmExportSet.h

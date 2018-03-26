@@ -1,0 +1,11 @@
+project(build)
+set(CMAKE_BUILD_TYPE Debug)
+add_library(foo foo.cxx)
+add_library(car foo.cxx)
+add_library(bar bar.c)
+add_library(dog  foo.cxx)
+target_link_libraries(foo car bar dog debug -lm)
+export(TARGETS bar dog car foo JSON
+  ${build_BINARY_DIR}/myexp.json)
+install(TARGETS bar dog car foo DESTINATION lib EXPORT myexp)
+install(EXPORT_JSON myexp DESTINATION share)

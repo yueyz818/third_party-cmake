@@ -102,6 +102,9 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args,
   if (mode == "EXPORT_ANDROID_MK") {
     return this->HandleExportAndroidMKMode(args);
   }
+  if (mode == "EXPORT_JSON") {
+    return this->HandleExportJSONMode(args);
+  }
 
   // Unknown mode.
   std::string e = "called with unknown mode ";
@@ -1247,13 +1250,119 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
     exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
     ica.GetConfigurations(), ica.GetComponent().c_str(), message,
     ica.GetExcludeFromAll(), fname.c_str(), name_space.GetCString(),
-    exportOld.IsEnabled(), true);
+    exportOld.IsEnabled(), true, false);
   this->Makefile->AddInstallGenerator(exportGenerator);
 
   return true;
 #else
   static_cast<void>(args);
   this->SetError("EXPORT_ANDROID_MK not supported in bootstrap cmake");
+  return false;
+#endif
+}
+
+bool cmInstallCommand::HandleExportJSONMode(
+  std::vector<std::string> const& args)
+{
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  // This is the EXPORT mode.
+  cmInstallCommandArguments ica(this->DefaultComponentName);
+  cmCAString exp(&ica.Parser, "EXPORT_JSON");
+  cmCAString name_space(&ica.Parser, "NAMESPACE", &ica.ArgumentGroup);
+  cmCAEnabler exportOld(&ica.Parser, "EXPORT_LINK_INTERFACE_LIBRARIES",
+                        &ica.ArgumentGroup);
+  cmCAString filename(&ica.Parser, "FILE", &ica.ArgumentGroup);
+  exp.Follows(nullptr);
+
+  ica.ArgumentGroup.Follows(&exp);
+  std::vector<std::string> unknownArgs;
+  ica.Parse(&args, &unknownArgs);
+
+  if (!unknownArgs.empty()) {
+    // Unknown argument.
+    std::ostringstream e;
+    e << args[0] << " given unknown argument \"" << unknownArgs[0] << "\".";
+    this->SetError(e.str());
+    return false;
+  }
+
+  if (!ica.Finalize()) {
+    return false;
+  }
+
+  // Make sure there is a destination.
+  if (ica.GetDestination().empty()) {
+    // A destination is required.
+    std::ostringstream e;
+    e << args[0] << " given no DESTINATION!";
+    this->SetError(e.str());
+    return false;
+  }
+
+  // Check the file name.
+  std::string fname = filename.GetString();
+  if (fname.find_first_of(":/\\") != std::string::npos) {
+    std::ostringstream e;
+    e << args[0] << " given invalid export file name \"" << fname << "\".  "
+      << "The FILE argument may not contain a path.  "
+      << "Specify the path in the DESTINATION argument.";
+    this->SetError(e.str());
+    return false;
+  }
+
+  // Check the file extension.
+  if (!fname.empty() &&
+      cmSystemTools::GetFilenameLastExtension(fname) != ".json") {
+    std::ostringstream e;
+    e << args[0] << " given invalid export file name \"" << fname << "\".  "
+      << "The FILE argument must specify a name ending in \".json\".";
+    this->SetError(e.str());
+    return false;
+  }
+  if (fname.find_first_of(":/\\") != std::string::npos) {
+    std::ostringstream e;
+    e << args[0] << " given export name \"" << exp.GetString() << "\".  "
+      << "This name cannot be safely converted to a file name.  "
+      << "Specify a different export name or use the FILE option to set "
+      << "a file name explicitly.";
+    this->SetError(e.str());
+    return false;
+  }
+
+  // Construct the file name.
+  if (fname.empty()) {
+    fname = exp.GetString();
+    fname += ".json";
+
+    if (fname.find_first_of(":/\\") != std::string::npos) {
+      std::ostringstream e;
+      e << args[0] << " given export name \"" << exp.GetString() << "\".  "
+        << "This name cannot be safely converted to a file name.  "
+        << "Specify a different export name or use the FILE option to set "
+        << "a file name explicitly.";
+      this->SetError(e.str());
+      return false;
+    }
+  }
+
+  cmExportSet* exportSet =
+    this->Makefile->GetGlobalGenerator()->GetExportSets()[exp.GetString()];
+
+  cmInstallGenerator::MessageLevel message =
+    cmInstallGenerator::SelectMessageLevel(this->Makefile);
+
+  // Create the export install generator.
+  cmInstallExportGenerator* exportGenerator = new cmInstallExportGenerator(
+    exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
+    ica.GetConfigurations(), ica.GetComponent().c_str(), message,
+    ica.GetExcludeFromAll(), fname.c_str(), name_space.GetCString(),
+    exportOld.IsEnabled(), false, true);
+  this->Makefile->AddInstallGenerator(exportGenerator);
+
+  return true;
+#else
+  static_cast<void>(args);
+  this->SetError("EXPORT_JSON not supported in bootstrap cmake");
   return false;
 #endif
 }
@@ -1361,7 +1470,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
     exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
     ica.GetConfigurations(), ica.GetComponent().c_str(), message,
     ica.GetExcludeFromAll(), fname.c_str(), name_space.GetCString(),
-    exportOld.IsEnabled(), false);
+    exportOld.IsEnabled(), false, false);
   this->Makefile->AddInstallGenerator(exportGenerator);
 
   return true;

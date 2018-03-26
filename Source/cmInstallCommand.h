@@ -40,6 +40,7 @@ private:
   bool HandleDirectoryMode(std::vector<std::string> const& args);
   bool HandleExportMode(std::vector<std::string> const& args);
   bool HandleExportAndroidMKMode(std::vector<std::string> const& args);
+  bool HandleExportJSONMode(std::vector<std::string> const& args);
   bool MakeFilesFullPath(const char* modeName,
                          const std::vector<std::string>& relFiles,
                          std::vector<std::string>& absFiles);

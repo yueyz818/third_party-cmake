@@ -29,7 +29,7 @@ public:
                            const char* component, MessageLevel message,
                            bool exclude_from_all, const char* filename,
                            const char* name_space, bool exportOld,
-                           bool android);
+                           bool android, bool json);
   ~cmInstallExportGenerator() override;
 
   cmExportSet* GetExportSet() { return this->ExportSet; }
